@@ -102,6 +102,25 @@ impl State {
             },
         ).await.unwrap();
 
+        println!("GPU info: {:?}", adapter.get_info());
+
+        for backend in instance.enumerate_adapters(wgpu::Backends::all()) {
+            println!("Other backend: {:?}", backend.get_info());
+        }
+
+        // Force OpenGL
+        //let adapter = instance
+        //    .enumerate_adapters(wgpu::Backends::all())
+        //    .filter(|adapter| {
+        //        // Check if this adapter supports our surface
+        //        adapter.is_surface_supported(&surface) &&
+        //        adapter.get_info().backend == wgpu::Backend::Gl
+        //    })
+        //    .next()
+        //    .unwrap();
+
+        println!("GPU info: {:?}", adapter.get_info());
+
         // Use adapter to create device and queue
         let (device, queue) = adapter.request_device(
         &wgpu::DeviceDescriptor {
@@ -207,7 +226,6 @@ impl State {
         &self.window
     }
 
-    // impl State
     pub fn resize(&mut self, new_size: winit::dpi::PhysicalSize<u32>) {
         if new_size.width > 0 && new_size.height > 0 {
             self.size = new_size;
@@ -261,6 +279,6 @@ impl State {
         output.present();
 
         Ok(())
-        }
+    }
 }
 
