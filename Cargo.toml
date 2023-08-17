@@ -9,9 +9,10 @@ edition = "2021"
 winit = "0.29.1-beta"
 env_logger = "*"
 log = "*"
-wgpu = "*"
+wgpu = "0.17.0"
 pollster = "*"
 bytemuck = { version = "*", features = [ "derive" ] }
+anyhow = "1.0"
 
 [dependencies.image]
 version = "0.24"
