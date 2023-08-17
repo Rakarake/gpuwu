@@ -12,7 +12,7 @@ use winit::{
 
 pub async fn run() {
     env_logger::init();
-    let event_loop = EventLoop::new();
+    let event_loop = EventLoop::new().unwrap();
     let window = WindowBuilder::new().build(&event_loop).unwrap();
 
     // Create render state
@@ -32,38 +32,38 @@ pub async fn run() {
                     Err(e) => eprintln!("{:?}", e),
                 }
             },
-            Event::MainEventsCleared => {
-                // RedrawRequested will only trigger once, unless we manually
-                // request it.
-                state.window().request_redraw();
-            },
+            //Event::MainEventsCleared => {
+            //    // RedrawRequested will only trigger once, unless we manually
+            //    // request it.
+            //    state.window().request_redraw();
+            //},
             Event::WindowEvent {
                 ref event,
                 window_id,
             } if window_id == state.window().id() => if !state.input(event) { // UPDATED!
                 match event {
                     WindowEvent::CloseRequested
-                    | WindowEvent::KeyboardInput {
-                        input:
-                            KeyboardInput {
-                                state: ElementState::Pressed,
-                                virtual_keycode: Some(VirtualKeyCode::Escape),
-                                ..
-                            },
-                        ..
-                    } => *control_flow = ControlFlow::Exit,
+                    //| WindowEvent::KeyboardInput {
+                    //    input:
+                    //        KeyboardInput {
+                    //            state: ElementState::Pressed,
+                    //            virtual_keycode: Some(VirtualKeyCode::Escape),
+                    //            ..
+                    //        },
+                    //    ..}
+                     => *control_flow = ControlFlow::Exit,
                     WindowEvent::Resized(physical_size) => {
                         state.resize(*physical_size);
                     }
-                    WindowEvent::ScaleFactorChanged { new_inner_size, .. } => {
-                        state.resize(**new_inner_size);
-                    }
+                    //WindowEvent::ScaleFactorChanged { inner_size_writer, .. } => {
+                    //    state.resize(**inner_size_writer);
+                    //}
                     _ => {}
                 }
             }
             _ => {}
         }
-    });
+    }).unwrap();
 }
 
 use winit::window::Window;
