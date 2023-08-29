@@ -135,7 +135,7 @@ pub async fn run() {
     // Event loop
     event_loop.run(move |event, _, control_flow| {
         match event {
-                    Event::RedrawRequested(window_id) if window_id == state.window().id() => {
+            Event::RedrawRequested(window_id) if window_id == state.window().id() => {
                 state.update();
                 match state.render() {
                     Ok(_) => {}
@@ -155,7 +155,7 @@ pub async fn run() {
             Event::WindowEvent {
                 ref event,
                 window_id,
-            } if window_id == state.window().id() => if !state.input(event) { // UPDATED!
+            } if window_id == state.window().id() => if !state.input(event) {
                 match event {
                     WindowEvent::CloseRequested
                      => *control_flow = ControlFlow::Exit,
@@ -167,19 +167,6 @@ pub async fn run() {
                     //            ..
                     //        },
                     //    ..}
-                    WindowEvent::KeyboardInput { device_id, event, is_synthetic } => {
-                        match event {
-                            KeyEvent { physical_key, logical_key, text, location, state: key_state, repeat, .. } => {
-                                match physical_key {
-                                    winit::keyboard::KeyCode::KeyW => {
-                                        println!("BING {:?}", key_state);
-                                        state.camera_controller.is_forward_pressed = true;
-                                    },
-                                    _ => {},
-                                }
-                            },
-                        }
-                    },
                     WindowEvent::Resized(physical_size) => {
                         state.resize(*physical_size);
                     }
@@ -555,7 +542,42 @@ impl State {
     }
 
     fn input(&mut self, event: &WindowEvent) -> bool {
-        false
+        match event {
+            WindowEvent::KeyboardInput { device_id, event, is_synthetic } => {
+                match event {
+                    KeyEvent { physical_key, logical_key, text, location, state: key_state, repeat, .. } => {
+                        match physical_key {
+                            winit::keyboard::KeyCode::KeyW => {
+                                println!("W pressed: {:?}", key_state);
+                                self.camera_controller.is_forward_pressed =
+                                    match key_state { ElementState::Pressed => true, ElementState::Released => false };
+                                true
+                            },
+                            winit::keyboard::KeyCode::KeyS => {
+                                println!("S pressed: {:?}", key_state);
+                                self.camera_controller.is_backward_pressed =
+                                    match key_state { ElementState::Pressed => true, ElementState::Released => false };
+                                true
+                            },
+                            winit::keyboard::KeyCode::KeyA => {
+                                println!("A pressed: {:?}", key_state);
+                                self.camera_controller.is_left_pressed =
+                                    match key_state { ElementState::Pressed => true, ElementState::Released => false };
+                                true
+                            },
+                            winit::keyboard::KeyCode::KeyD => {
+                                println!("D pressed: {:?}", key_state);
+                                self.camera_controller.is_right_pressed =
+                                    match key_state { ElementState::Pressed => true, ElementState::Released => false };
+                                true
+                            },
+                            _ => false,
+                        }
+                    },
+                }
+            },
+            _ => false,
+        }
     }
 
     fn update(&mut self) {
