@@ -146,12 +146,9 @@ pub async fn run() {
                     // All other errors (Outdated, Timeout) should be resolved by the next frame
                     Err(e) => eprintln!("{:?}", e),
                 }
+                // Idk about this
+                state.window().request_redraw();
             },
-            //Event::MainEventsCleared => {
-            //    // RedrawRequested will only trigger once, unless we manually
-            //    // request it.
-            //    state.window().request_redraw();
-            //},
             Event::WindowEvent {
                 ref event,
                 window_id,
