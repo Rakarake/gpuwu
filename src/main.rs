@@ -136,7 +136,6 @@ pub async fn run() {
     event_loop.run(move |event, _, control_flow| {
         match event {
             Event::RedrawRequested(window_id) if window_id == state.window().id() => {
-                state.update();
                 match state.render() {
                     Ok(_) => {}
                     // Reconfigure the surface if lost
@@ -148,6 +147,10 @@ pub async fn run() {
                 }
                 // Idk about this
                 state.window().request_redraw();
+            },
+            // When new frames are wanted
+            Event::AboutToWait => {
+                state.update();
             },
             Event::WindowEvent {
                 ref event,
