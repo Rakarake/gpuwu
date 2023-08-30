@@ -129,6 +129,7 @@ pub struct RenderState {
     camera_controller: CameraController,
     instances: Vec<Instance>,
     instance_buffer: wgpu::Buffer,
+    depth_texture: Texture,
 }
 
 impl RenderState {
@@ -361,7 +362,14 @@ impl RenderState {
                 // Requires Features::CONSERVATIVE_RASTERIZATION
                 conservative: false,
             },
-            depth_stencil: None, // 1.
+            // The stencil buffer is us
+            depth_stencil: Some(wgpu::DepthStencilState {
+                format: Texture::DEPTH_FORMAT,
+                depth_write_enabled: true,
+                depth_compare: wgpu::CompareFunction::Less, // 1.
+                stencil: wgpu::StencilState::default(), // 2.
+                bias: wgpu::DepthBiasState::default(),
+            }),
             multisample: wgpu::MultisampleState {
                 count: 1, // 2.
                 mask: !0, // 3.
@@ -422,6 +430,9 @@ impl RenderState {
             }
         );
 
+        // Depth buffer
+        let depth_texture = Texture::create_depth_texture(&device, &config, "depth_texture");
+
         // Done
         Self {
             window,
@@ -444,6 +455,7 @@ impl RenderState {
             camera_controller,
             instances,
             instance_buffer,
+            depth_texture,
         }
     }
 
@@ -458,6 +470,7 @@ impl RenderState {
             self.config.height = new_size.height;
             self.surface.configure(&self.device, &self.config);
         }
+        self.depth_texture = Texture::create_depth_texture(&self.device, &self.config, "depth_texture");
     }
 
     pub fn input(&mut self, event: &WindowEvent) -> bool {
@@ -529,7 +542,14 @@ impl RenderState {
                         store: true,
                     },
                 })],
-                depth_stencil_attachment: None,
+                depth_stencil_attachment: Some(wgpu::RenderPassDepthStencilAttachment {
+                    view: &self.depth_texture.view,
+                    depth_ops: Some(wgpu::Operations {
+                        load: wgpu::LoadOp::Clear(1.0),
+                        store: true,
+                    }),
+                    stencil_ops: None,
+                }),
             });
 
             // Use render pipeline to draw them triangles
