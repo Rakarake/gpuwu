@@ -1,31 +1,39 @@
 {
   description = "gpuwu is very UwU";
-  inputs.flake-utils.url = "github:numtide/flake-utils";
+  inputs = {
+    flake-utils.url = "github:numtide/flake-utils";
+    nixpkgs.url = "nixpkgs/nixos-unstable";
+  };
   outputs = { self, nixpkgs, flake-utils }:
     flake-utils.lib.eachDefaultSystem (system:
-        let
-          pkgs = nixpkgs.legacyPackages.${system};
-          #runDerivation = nixpkgs.mkShell { shellHook = "cargo run"; };
-        in {
-          devShells.default = with pkgs; mkShell rec {
-            nativeBuildInputs = [
-              pkg-config
-            ];
-            buildInputs = [
-              udev alsa-lib vulkan-loader
-              # To use the x11 feature
-              xorg.libX11 xorg.libXcursor xorg.libXi xorg.libXrandr 
-              # To use the wayland feature
-              libxkbcommon wayland
-              # Cmake
-              cmake
-              # Fontconfig
-              fontconfig
-            ];
-            LD_LIBRARY_PATH = lib.makeLibraryPath buildInputs;
-          };
-          #apps.default = { type = "app"; program = "${runDerivation}/bin/???????"; };
-        }
-      );
-}
+      let pkgs = import nixpkgs { inherit system; }; in
+    {
+        defaultPackage = pkgs.rustPlatform.buildRustPackage rec {
+          pname = "gpuwu";
+          version = "0.0.1";
+          src = ./.;
+          nativeBuildInputs = with pkgs; [
+            pkg-config
+          ];
 
+          buildInputs = with pkgs; [
+            udev alsa-lib vulkan-loader
+            # To use the x11 feature
+            xorg.libX11 xorg.libXcursor xorg.libXi xorg.libXrandr 
+            # To use the wayland feature
+            libxkbcommon wayland
+            # Cmake
+            cmake
+            # Fontconfig
+            fontconfig
+          ];
+
+          cargoLock = {
+            lockFile = ./Cargo.lock;
+          };
+
+          LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath buildInputs;
+        };
+      }
+    );
+}
