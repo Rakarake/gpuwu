@@ -6,8 +6,10 @@
   };
   outputs = { self, nixpkgs, flake-utils }:
     flake-utils.lib.eachDefaultSystem (system:
-      let pkgs = import nixpkgs { inherit system; }; in
-    {
+      let pkgs = import nixpkgs { inherit system; }; in {
+        devShell = pkgs.mkShell {
+          packages = [ pkgs.wasm-bindgen-cli ];
+        };
         defaultPackage = pkgs.rustPlatform.buildRustPackage rec {
           pname = "gpuwu";
           version = "0.0.1";
