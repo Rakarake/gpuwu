@@ -3,10 +3,18 @@
   inputs = {
     flake-utils.url = "github:numtide/flake-utils";
     nixpkgs.url = "nixpkgs/nixos-unstable";
+    rust-overlay = {
+      url = "github:oxalica/rust-overlay";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
-  outputs = { self, nixpkgs, flake-utils }:
+  outputs = { self, nixpkgs, rust-overlay, flake-utils }:
     flake-utils.lib.eachDefaultSystem (system:
-      let pkgs = import nixpkgs { inherit system; }; in {
+      let
+        overlays = [ rust-overlay.overlays.default ];
+        pkgs = import nixpkgs { inherit overlays system; };
+        rust = pkgs.rust-bin.fromRustupToolchainFile ./rust-toolchain.toml;
+      in {
         devShell = pkgs.mkShell {
           packages = [ pkgs.wasm-bindgen-cli ];
         };
@@ -32,6 +40,11 @@
 
           cargoLock = {
             lockFile = ./Cargo.lock;
+          };
+
+          # This makes sure we can build for WASM
+          devShell = pkgs.mkShell {
+            packages = [ pkgs.wasm-bindgen-cli rust ];
           };
 
           LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath buildInputs;
