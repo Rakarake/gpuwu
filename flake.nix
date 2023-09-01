@@ -28,7 +28,7 @@
             fontconfig
           ];
       in {
-        # The rust package, use nix build to build
+        # The rust package, use `nix build` to build
         defaultPackage = pkgs.rustPlatform.buildRustPackage rec {
           pname = "gpuwu";
           version = "0.0.1";
@@ -51,7 +51,7 @@
         # Remember to add necessary changes made in defaultPackage to devShell
         devShell = pkgs.mkShell rec {
           buildInputs = packageDeps;
-          packages = [ pkgs.wasm-bindgen-cli rust ];
+          packages = [ pkgs.wasm-bindgen-cli pkgs.wasm-pack rust ];
           LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath buildInputs;
         };
       }
