@@ -13,20 +13,10 @@
       let
         overlays = [ rust-overlay.overlays.default ];
         pkgs = import nixpkgs { inherit overlays system; };
+        # This makes all targets available, WASM
         rust = pkgs.rust-bin.fromRustupToolchainFile ./rust-toolchain.toml;
-      in {
-        devShell = pkgs.mkShell {
-          packages = [ pkgs.wasm-bindgen-cli ];
-        };
-        defaultPackage = pkgs.rustPlatform.buildRustPackage rec {
-          pname = "gpuwu";
-          version = "0.0.1";
-          src = ./.;
-          nativeBuildInputs = with pkgs; [
-            pkg-config
-          ];
-
-          buildInputs = with pkgs; [
+        # All packages needed for building
+        packageDeps = with pkgs; [
             udev alsa-lib vulkan-loader
             # To use the x11 feature
             xorg.libX11 xorg.libXcursor xorg.libXi xorg.libXrandr 
@@ -37,16 +27,31 @@
             # Fontconfig
             fontconfig
           ];
+      in {
+        # The rust package, use nix build to build
+        defaultPackage = pkgs.rustPlatform.buildRustPackage rec {
+          pname = "gpuwu";
+          version = "0.0.1";
+          src = ./.;
+          nativeBuildInputs = with pkgs; [
+            pkg-config
+          ];
+
+          # Runtime deps
+          buildInputs = packageDeps;
 
           cargoLock = {
             lockFile = ./Cargo.lock;
           };
 
-          # This makes sure we can build for WASM
-          devShell = pkgs.mkShell {
-            packages = [ pkgs.wasm-bindgen-cli rust ];
-          };
+          LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath buildInputs;
+        };
 
+        # This makes sure we can build for WASM
+        # Remember to add necessary changes made in defaultPackage to devShell
+        devShell = pkgs.mkShell rec {
+          buildInputs = packageDeps;
+          packages = [ pkgs.wasm-bindgen-cli rust ];
           LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath buildInputs;
         };
       }
