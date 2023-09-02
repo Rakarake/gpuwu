@@ -8,6 +8,7 @@ use crate::camera::{Camera, CameraController, CameraUniform};
 use crate::texture::Texture;
 use cgmath::prelude::*;
 use log::info;
+use winit::dpi::PhysicalSize;
 
 
 #[repr(C)]
@@ -135,7 +136,7 @@ pub struct RenderState {
 
 impl RenderState {
     // Creating some of the wgpu types requires async code
-    pub async fn new(window: Window) -> Self {
+    pub async fn new(window: Window, window_dimensions: PhysicalSize<u32>) -> Self {
         let size = window.inner_size();
 
         // The instance is a handle to our GPU
@@ -159,7 +160,7 @@ impl RenderState {
             },
         ).await.unwrap();
 
-        println!("GPU info: {:?}", adapter.get_info());
+        info!("GPU info: {:?}", adapter.get_info());
 
         for backend in instance.enumerate_adapters(wgpu::Backends::all()) {
             println!("Other backend: {:?}", backend.get_info());
@@ -175,8 +176,6 @@ impl RenderState {
         //    })
         //    .next()
         //    .unwrap();
-
-        println!("GPU info: {:?}", adapter.get_info());
 
         // Use adapter to create device and queue
         let (device, queue) = adapter.request_device(
@@ -203,12 +202,12 @@ impl RenderState {
             .filter(|f| f.is_srgb())
             .next()
             .unwrap_or(surface_caps.formats[0]);
-        info!("WGPU Surface dimensions: {:?}", size);
+        info!("WGPU Surface dimensions: {:?}", window_dimensions);
         let config = wgpu::SurfaceConfiguration {
             usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
             format: surface_format,
-            width: 400,
-            height: 400,
+            width: window_dimensions.width,
+            height: window_dimensions.height,
             //present_mode: surface_caps.present_modes[0],
             present_mode: wgpu::PresentMode::AutoVsync,
             alpha_mode: surface_caps.alpha_modes[0],

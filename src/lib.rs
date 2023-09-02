@@ -17,26 +17,28 @@ use wasm_bindgen::prelude::*;
 use winit::window::Window;
 use winit::dpi::PhysicalSize;
 #[cfg(not(target_arch="wasm32"))]
-fn create_window(event_loop: &EventLoop<()>) -> Window {
-    WindowBuilder::new()
-       .with_inner_size(PhysicalSize::new(400, 400))
-       .with_min_inner_size(PhysicalSize::new(400, 400))
-       .build(&event_loop).unwrap()
+fn create_window(event_loop: &EventLoop<()>) -> (Window, PhysicalSize<u32>) {
+    let size = PhysicalSize::new(400, 400);
+    (WindowBuilder::new()
+       .with_inner_size(size)
+       .with_min_inner_size(size)
+       .build(&event_loop).unwrap(), size)
 }
 #[cfg(target_arch="wasm32")]
-fn create_window(event_loop: &EventLoop<()>) -> Window {
+fn create_window(event_loop: &EventLoop<()>) -> (Window, PhysicalSize<u32>) {
     use winit::platform::web::WindowBuilderExtWebSys;
     web_sys::window()
         .and_then(|win| win.document())
         .and_then(|doc| {
             let canvas_element = doc.get_element_by_id("gpuwu-canvas")?;
-            info!("YES, ALRIGHT");
             let canvas = canvas_element
                 .dyn_into::<web_sys::HtmlCanvasElement>().ok()?;
-            info!("Webpage canvas title (tooltip): {:?}", canvas.title());
-            Some(WindowBuilder::new()
+            //info!("Webpage canvas title (tooltip): {:?}", canvas.title());
+            //info!("Webpage canvas width: {:?}, height: {:?}", canvas.width(), canvas.height());
+            let size = PhysicalSize::new(canvas.width(), canvas.height());
+            Some((WindowBuilder::new()
                 .with_canvas(Some(canvas))
-                .build(&event_loop).unwrap())
+                .build(&event_loop).unwrap(), size))
         })
         .expect("Could not connect canvas and winit window.")
 }
@@ -59,12 +61,12 @@ pub async fn run() {
 
     let event_loop = EventLoop::new().unwrap();
 
-    let window = create_window(&event_loop);
+    let (window, window_size) = create_window(&event_loop);
 
     info!("Window: {:?}", window.inner_size());
 
     // Create render state
-    let mut state = RenderState::new(window).await;
+    let mut state = RenderState::new(window, window_size).await;
     // Event loop
     event_loop.run(move |event, _, control_flow| {
         match event {
