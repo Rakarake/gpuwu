@@ -51,7 +51,7 @@
         # Remember to add necessary changes made in defaultPackage to devShell
         devShell = pkgs.mkShell rec {
           buildInputs = packageDeps;
-          packages = [ pkgs.wasm-bindgen-cli pkgs.wasm-pack rust ];
+          packages = [ pkgs.wasm-bindgen-cli pkgs.wasm-pack pkgs.python3 rust ];
           LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath buildInputs;
         };
       }

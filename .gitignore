@@ -1,3 +1,6 @@
 /target
 .direnv
+# "Intended" for wasm-pack
 pkg
+# "Intended" for wasm-bindgen cli
+tmp

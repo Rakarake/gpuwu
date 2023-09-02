@@ -8,9 +8,37 @@ use winit::{
     window::WindowBuilder,
 };
 use render::RenderState;
+use log::info;
 
 #[cfg(target_arch="wasm32")]
 use wasm_bindgen::prelude::*;
+
+// Code to create the window
+use winit::window::Window;
+use winit::dpi::PhysicalSize;
+#[cfg(not(target_arch="wasm32"))]
+fn create_window(event_loop: &EventLoop<()>) -> Window {
+    WindowBuilder::new()
+       .with_inner_size(PhysicalSize::new(400, 400))
+       .with_min_inner_size(PhysicalSize::new(400, 400))
+       .build(&event_loop).unwrap()
+}
+#[cfg(target_arch="wasm32")]
+fn create_window(event_loop: &EventLoop<()>) -> Window {
+    use winit::platform::web::WindowBuilderExtWebSys;
+    web_sys::window()
+        .and_then(|win| win.document())
+        .and_then(|doc| {
+            let canvas_element = doc.get_element_by_id("gpuwu-canvas")?;
+            info!("YES, ALRIGHT");
+            let canvas = canvas_element
+                .dyn_into::<web_sys::HtmlCanvasElement>().ok()?;
+            Some(WindowBuilder::new()
+                .with_canvas(Some(canvas))
+                .build(&event_loop).unwrap())
+        })
+        .expect("Could not connect canvas and winit window.")
+}
 
 // Main program loop
 #[cfg_attr(target_arch="wasm32", wasm_bindgen(start))]
@@ -19,32 +47,20 @@ pub async fn run() {
     cfg_if::cfg_if! {
         if #[cfg(target_arch = "wasm32")] {
             std::panic::set_hook(Box::new(console_error_panic_hook::hook));
-            console_log::init_with_level(log::Level::Warn).expect("Couldn't initialize logger");
+            console_log::init_with_level(log::Level::Debug).expect("Couldn't initialize logger");
+            //console_log::init_with_level(log::Level::Warn).expect("Couldn't initialize logger");
         } else {
             env_logger::init();
         }
     }
-    let event_loop = EventLoop::new().unwrap();
-    let window = WindowBuilder::new().build(&event_loop).unwrap();
 
-    #[cfg(target_arch = "wasm32")]
-    {
-        // Winit prevents sizing with CSS, so we have to set
-        // the size manually when on web.
-        use winit::dpi::PhysicalSize;
-        window.request_inner_size(PhysicalSize::new(450, 400));
-        
-        use winit::platform::web::WindowExtWebSys;
-        web_sys::window()
-            .and_then(|win| win.document())
-            .and_then(|doc| {
-                let dst = doc.get_element_by_id("gpuwu-app")?;
-                let canvas = web_sys::Element::from(window.canvas().unwrap());
-                dst.append_child(&canvas).ok()?;
-                Some(())
-            })
-            .expect("Couldn't append canvas to document body.");
-    }
+    info!("Hello There! OwO");
+
+    let event_loop = EventLoop::new().unwrap();
+
+    let window = create_window(&event_loop);
+
+    info!("Window: {:?}", window.inner_size());
 
     // Create render state
     let mut state = RenderState::new(window).await;
