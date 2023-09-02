@@ -33,6 +33,7 @@ fn create_window(event_loop: &EventLoop<()>) -> Window {
             info!("YES, ALRIGHT");
             let canvas = canvas_element
                 .dyn_into::<web_sys::HtmlCanvasElement>().ok()?;
+            info!("Webpage canvas title (tooltip): {:?}", canvas.title());
             Some(WindowBuilder::new()
                 .with_canvas(Some(canvas))
                 .build(&event_loop).unwrap())

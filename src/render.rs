@@ -7,6 +7,7 @@ use cgmath;
 use crate::camera::{Camera, CameraController, CameraUniform};
 use crate::texture::Texture;
 use cgmath::prelude::*;
+use log::info;
 
 
 #[repr(C)]
@@ -202,11 +203,12 @@ impl RenderState {
             .filter(|f| f.is_srgb())
             .next()
             .unwrap_or(surface_caps.formats[0]);
+        info!("WGPU Surface dimensions: {:?}", size);
         let config = wgpu::SurfaceConfiguration {
             usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
             format: surface_format,
-            width: size.width,
-            height: size.height,
+            width: 400,
+            height: 400,
             //present_mode: surface_caps.present_modes[0],
             present_mode: wgpu::PresentMode::AutoVsync,
             alpha_mode: surface_caps.alpha_modes[0],
