@@ -77,12 +77,11 @@ pub async fn run() {
                     // All other errors (Outdated, Timeout) should be resolved by the next frame
                     Err(e) => eprintln!("{:?}", e),
                 }
-                // Idk about this
-                state.window().request_redraw();
             },
             // When new frames are wanted
             Event::AboutToWait => {
                 state.update();
+                state.window().request_redraw();
             },
             Event::WindowEvent {
                 ref event,
