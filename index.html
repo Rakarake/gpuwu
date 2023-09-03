@@ -7,10 +7,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/png" href='icon.png' />
     <title>Learn WGPU</title>
+    <style>
+        canvas {
+            border: 5px solid pink;
+            overflow: hidden;
+            width: 400px;
+            height: 400px;
+        }
+    </style>
 </head>
 
 <body id="gpuwu-app">
-  <canvas id="gpuwu-canvas" title="Look here for cool stuff!" width="400" height="400" style="border:1px solid #000000;">
+  <img src="icon.png">
+  <canvas id="gpuwu-canvas" width="400" height="400" >
   </canvas>
   <script type="module">
       import init from "./pkg/gpuwu.js";

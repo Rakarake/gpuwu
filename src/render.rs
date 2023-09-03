@@ -206,8 +206,8 @@ impl RenderState {
         let config = wgpu::SurfaceConfiguration {
             usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
             format: surface_format,
-            width: window_dimensions.width,
-            height: window_dimensions.height,
+            width: window.inner_size().width,
+            height: window.inner_size().height,
             //present_mode: surface_caps.present_modes[0],
             present_mode: wgpu::PresentMode::AutoVsync,
             alpha_mode: surface_caps.alpha_modes[0],
@@ -476,39 +476,36 @@ impl RenderState {
 
     pub fn input(&mut self, event: &WindowEvent) -> bool {
         match event {
-            WindowEvent::KeyboardInput { device_id, event, is_synthetic } => {
-                match event {
-                    KeyEvent { physical_key, logical_key, text, location, state: key_state, repeat, .. } => {
-                        match physical_key {
-                            winit::keyboard::KeyCode::KeyW => {
-                                println!("W pressed: {:?}", key_state);
-                                self.camera_controller.is_forward_pressed =
-                                    match key_state { ElementState::Pressed => true, ElementState::Released => false };
-                                true
-                            },
-                            winit::keyboard::KeyCode::KeyS => {
-                                println!("S pressed: {:?}", key_state);
-                                self.camera_controller.is_backward_pressed =
-                                    match key_state { ElementState::Pressed => true, ElementState::Released => false };
-                                true
-                            },
-                            winit::keyboard::KeyCode::KeyA => {
-                                println!("A pressed: {:?}", key_state);
-                                self.camera_controller.is_left_pressed =
-                                    match key_state { ElementState::Pressed => true, ElementState::Released => false };
-                                true
-                            },
-                            winit::keyboard::KeyCode::KeyD => {
-                                println!("D pressed: {:?}", key_state);
-                                self.camera_controller.is_right_pressed =
-                                    match key_state { ElementState::Pressed => true, ElementState::Released => false };
-                                true
-                            },
-                            _ => false,
-                        }
+            WindowEvent::KeyboardInput {
+                input:
+                    KeyboardInput {
+                        state,
+                        virtual_keycode: Some(keycode),
+                        ..
                     },
+                ..
+            } => {
+                let is_pressed = *state == ElementState::Pressed;
+                match keycode {
+                    VirtualKeyCode::W | VirtualKeyCode::Up => {
+                        self.camera_controller.is_forward_pressed = is_pressed;
+                        true
+                    }
+                    VirtualKeyCode::A | VirtualKeyCode::Left => {
+                        self.camera_controller.is_left_pressed = is_pressed;
+                        true
+                    }
+                    VirtualKeyCode::S | VirtualKeyCode::Down => {
+                        self.camera_controller.is_backward_pressed = is_pressed;
+                        true
+                    }
+                    VirtualKeyCode::D | VirtualKeyCode::Right => {
+                        self.camera_controller.is_right_pressed = is_pressed;
+                        true
+                    }
+                    _ => false,
                 }
-            },
+            }
             _ => false,
         }
     }
