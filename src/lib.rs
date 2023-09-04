@@ -1,6 +1,8 @@
 mod texture;
 mod camera;
 mod render;
+mod model;
+mod resources;
 
 use winit::{
     event::*,

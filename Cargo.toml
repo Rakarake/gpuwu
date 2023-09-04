@@ -15,11 +15,19 @@ bytemuck = { version = "*", features = [ "derive" ] }
 anyhow = "1.0"
 cgmath = "0.18"
 cfg-if = "1"
+tobj = { version = "3.2.1", features = [
+    "async",
+]}
 
 [dependencies.image]
 version = "0.24"
 default-features = false
 features = ["png", "jpeg"]
+
+[build-dependencies]
+anyhow = "1.0"
+fs_extra = "1.2"
+glob = "0.3"
 
 [lib]
 crate-type = ["cdylib", "rlib"]
@@ -34,6 +42,7 @@ web-sys = { version = "0.3", features = [
     "Document",
     "Window",
     "Element",
-    "CanvasRenderingContext2d",
+    "Location",
 ]}
+reqwest = { version = "0.11" }
 
