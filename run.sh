@@ -1,4 +1,4 @@
-wasm-pack build --dev --debug --target web
+wasm-pack build --dev --target web
 ./run-web-server.py
 
 # Using just wasm-bindgen
