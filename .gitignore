@@ -4,3 +4,5 @@
 pkg
 # "Intended" for wasm-bindgen cli
 tmp
+.cargo
+.rustup
