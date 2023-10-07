@@ -96,7 +96,11 @@ pub struct RenderState {
     instances: Vec<Instance>,
     instance_buffer: wgpu::Buffer,
     depth_texture: Texture,
-    obj_model: Model
+    obj_model: Model,
+    // Font stuff
+    font_system: cosmic_text::FontSystem,
+    swash_cache: cosmic_text::SwashCache,
+    font_temp_buffer: cosmic_text::Buffer,
 }
 
 impl RenderState {
@@ -387,6 +391,18 @@ impl RenderState {
             }
         );
 
+        // Font stuff
+        use cosmic_text::{Attrs, Color, FontSystem, SwashCache, Buffer, Metrics, Shaping};
+        
+        // A FontSystem provides access to detected system fonts, create one per application
+        let mut font_system = FontSystem::new();
+        
+        // A SwashCache stores rasterized glyphs, create one per application
+        let mut swash_cache = SwashCache::new();
+
+        let metrics = Metrics::new(14.0, 20.0);
+        let mut font_temp_buffer = Buffer::new(&mut font_system, metrics);       
+
         // Done
         Self {
             window,
@@ -407,6 +423,9 @@ impl RenderState {
             instance_buffer,
             depth_texture,
             obj_model,
+            font_system,
+            swash_cache,
+            font_temp_buffer,
         }
     }
 
@@ -499,6 +518,38 @@ impl RenderState {
                     stencil_ops: None,
                 }),
             });
+
+        //// Text metrics indicate the font size and line height of a buffer
+        //let metrics = Metrics::new(14.0, 20.0);
+        //
+        //// A Buffer provides shaping and layout for a UTF-8 string, create one per text widget
+        //let mut buffer = Buffer::new(&mut font_system, metrics);
+        //
+        //// Borrow buffer together with the font system for more convenient method calls
+        //let mut font_temp_buffer = buffer.borrow_with(&mut font_system);
+        //
+        //// Set a size for the text buffer, in pixels
+        //font_temp_buffer.set_size(80.0, 25.0);
+        //
+        //// Attributes indicate what font to choose
+        //let attrs = Attrs::new();
+        //
+        //// Add some text!
+        //font_temp_buffer.set_text("Hello, Rust! 🦀\n", attrs, Shaping::Advanced);
+        //
+        //// Perform shaping as desired
+        //font_temp_buffer.shape_until_scroll();
+        //
+        //// Inspect the output runs
+        //for run in buffer.layout_runs() {
+        //    for glyph in run.glyphs.iter() {
+        //        println!("{:#?}", glyph);
+        //    }
+        //}
+
+        //// Create a default text color
+        //let text_color = Color::rgb(0xFF, 0xFF, 0xFF);
+
 
             render_pass.set_vertex_buffer(1, self.instance_buffer.slice(..));
             render_pass.set_pipeline(&self.render_pipeline);
