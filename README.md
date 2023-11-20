@@ -14,11 +14,14 @@ let debug_text = gpuwu::Debug::new("Haha, lol 😂\nYeah rite", (10.0, 12.0));
 
 let mut state: i32 = 0;
 
-uwu.gogogo(|renderer: gpuwu::Renderer, input: gpuwu::Input|
-    renderer.render([
-        duck,
-        debug_text,
-    ]);
+uwu.gogogo(|renderer: &mut gpuwu::Renderer, input: &mut gpuwu::Input|
+    // get, get_pressed, get_realeased are bool. get_axis is float
+    if input.get(gpuwu::InputThing::KeyA, gpuwu::InputMode::Hold) {
+        renderer.render([
+            duck,
+            debug_text,
+        ]);
+    }
     state += 1;
 );
 ```
