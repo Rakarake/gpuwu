@@ -10,7 +10,7 @@ let duck = gpuwu::Render3DObject::new("objs/cube.obj", (0,0,0))
     .build();
 
 // Coordinate system is in pixels troglodyte style
-let debug_text = gpuwu::Debug::new("Haha, lol 😂\nYeah rite", (10.0, 12.0));
+let debug_text = gpuwu::Text::new("Haha, lol 😂\nYeah rite", (10.0, 12.0));
 
 let mut state: i32 = 0;
 

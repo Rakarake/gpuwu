@@ -3,6 +3,7 @@ mod camera;
 mod render;
 mod model;
 mod resources;
+mod text;
 
 use winit::{
     event::*,
