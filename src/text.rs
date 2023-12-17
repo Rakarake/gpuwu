@@ -93,3 +93,4 @@ impl Text {
         Ok((result, (width as usize, height as usize)))
     }
 }
+
