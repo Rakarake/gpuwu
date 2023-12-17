@@ -1,4 +1,5 @@
 use crate::texture;
+use crate::render::Vertex;
 
 pub struct Model {
     pub meshes: Vec<Mesh>,
@@ -17,10 +18,6 @@ pub struct Mesh {
     pub index_buffer: wgpu::Buffer,
     pub num_elements: u32,
     pub material: usize,
-}
-
-pub trait Vertex {
-    fn desc() -> wgpu::VertexBufferLayout<'static>;
 }
 
 #[repr(C)]

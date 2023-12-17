@@ -6,11 +6,16 @@ use wgpu::util::DeviceExt;
 use cgmath;
 use crate::camera::{Camera, CameraController, CameraUniform};
 use crate::texture::Texture;
-use crate::model::{Vertex, ModelVertex, DrawModel, Model};
+use crate::model::{ModelVertex, DrawModel, Model};
 use crate::resources::load_model;
 use cgmath::prelude::*;
 use log::info;
 use winit::dpi::PhysicalSize;
+
+// Generic vertex
+pub trait Vertex {
+    fn desc() -> wgpu::VertexBufferLayout<'static>;
+}
 
 struct Instance {
     position: cgmath::Vector3<f32>,
@@ -519,11 +524,10 @@ impl RenderState {
         //// Create a default text color
         //let text_color = Color::rgb(0xFF, 0xFF, 0xFF);
 
-
-            // TODO: see if this can be removed
             render_pass.set_vertex_buffer(1, self.instance_buffer.slice(..));
             render_pass.set_pipeline(&self.render_pipeline);
             render_pass.draw_model_instanced(&self.obj_model, 0..self.instances.len() as u32, &self.camera_bind_group);
+
         }
 
         // submit will accept anything that implements IntoIter

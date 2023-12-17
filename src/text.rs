@@ -1,3 +1,14 @@
+//use wgpu::util::DeviceExt;
+//
+//#[repr(C)]
+//#[derive(Copy, Clone, Debug, bytemuck::Pod, bytemuck::Zeroable)]
+//struct TextVertex {
+//    position: [f32; 3]
+//    w: u32,
+//    h: u32,
+//    color: [],
+//}
+//
 //pub struct Text {
 //    text_buff: cosmic_text::Buffer,
 //    gpu_buff: wgpu::Buffer
@@ -33,21 +44,21 @@
 //        text_buff.set_text(font_system, text, attrs, cosmic_text::Shaping::Advanced);
 //        text_buff.shape_until_scroll(font_system);
 //        let text_color = cosmic_text::Color::rgb(0xFF, 0xFF, 0xFF);
+//        let mut vertices = Vec::new();
 //        text_buff.draw(font_system, swash_cache, text_color, |x, y, w, h, color| {
 //            // Fill in your code here for drawing rectangles
 //            println!("Drawing: {:?}, {:?}, {:?}, {:?}, {:?}", x, y, w, h, color);
+//            vertices.push(TextVertex { x, y, w, h, color });
 //        });
 //
 //        // The GPU buffer
-//        let gpu_buff = device.create_buffer_init(
-//            &wgpu::util::BufferInitDescriptor {
-//                label: Some("Vertex Buffer"),
-//                contents: bytemuck::cast_slice(VERTICES),
-//                usage: wgpu::BufferUsages::VERTEX,
-//            }
-//        );
+//        let vertex_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+//            label: Some("Vertex Buffer"),
+//            contents: bytemuck::cast_slice(&[1,2,3]),
+//            usage: wgpu::BufferUsages::VERTEX,
+//        });
 //        //Text { buff:  }
-//        Text { text_buff: text_buff, gpu_buff: }
+//        Text { text_buff: text_buff, gpu_buff:  }
 //    }
 //}
 //

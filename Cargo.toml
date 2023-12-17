@@ -19,6 +19,7 @@ tobj = { version = "3.2.1", features = [
     "async",
 ]}
 cosmic-text = { git = "https://github.com/pop-os/cosmic-text" }
+num-complex = "*"
 
 [dependencies.image]
 version = "0.24"
