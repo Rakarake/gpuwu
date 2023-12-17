@@ -1,5 +1,5 @@
-use crate::texture;
 use crate::render::Vertex;
+use crate::texture;
 
 pub struct Model {
     pub meshes: Vec<Mesh>,
@@ -57,7 +57,12 @@ impl Vertex for ModelVertex {
 
 use std::ops::Range;
 pub trait DrawModel<'a> {
-    fn draw_mesh(&mut self, mesh: &'a Mesh, material: &'a Material, camera_bind_group: &'a wgpu::BindGroup);
+    fn draw_mesh(
+        &mut self,
+        mesh: &'a Mesh,
+        material: &'a Material,
+        camera_bind_group: &'a wgpu::BindGroup,
+    );
     fn draw_mesh_instanced(
         &mut self,
         mesh: &'a Mesh,
@@ -78,7 +83,12 @@ impl<'a, 'b> DrawModel<'b> for wgpu::RenderPass<'a>
 where
     'b: 'a,
 {
-    fn draw_mesh(&mut self, mesh: &'b Mesh, material: &'b Material, camera_bind_group: &'b wgpu::BindGroup) {
+    fn draw_mesh(
+        &mut self,
+        mesh: &'b Mesh,
+        material: &'b Material,
+        camera_bind_group: &'b wgpu::BindGroup,
+    ) {
         self.draw_mesh_instanced(mesh, material, 0..1, camera_bind_group);
     }
 
@@ -112,4 +122,3 @@ where
         }
     }
 }
-

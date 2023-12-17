@@ -63,7 +63,7 @@ fn main() {
         let g = scale(color.g());
         let b = scale(color.b());
         canvas[y as usize][x as usize] = Some((r, g, b));
-        
+
         let pixel = imgbuf.get_pixel_mut(x as u32, y as u32);
         *pixel = image::Rgb([r, g, b]);
     });
@@ -113,4 +113,3 @@ fn main() {
     // GPUWU main loop here
     pollster::block_on(run());
 }
-

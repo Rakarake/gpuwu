@@ -1,32 +1,36 @@
-mod texture;
 mod camera;
-mod render;
 mod model;
+mod render;
 mod resources;
 mod text;
+mod texture;
 
+use log::info;
+use render::RenderState;
 use winit::{
     event::*,
     event_loop::{ControlFlow, EventLoop},
     window::WindowBuilder,
 };
-use render::RenderState;
-use log::info;
 
-#[cfg(target_arch="wasm32")]
+#[cfg(target_arch = "wasm32")]
 use wasm_bindgen::prelude::*;
 
 // Code to create the window
-use winit::window::Window;
 use winit::dpi::PhysicalSize;
-#[cfg(not(target_arch="wasm32"))]
+use winit::window::Window;
+#[cfg(not(target_arch = "wasm32"))]
 fn create_window(event_loop: &EventLoop<()>) -> (Window, PhysicalSize<u32>) {
     let size = PhysicalSize::new(400, 400);
-    (WindowBuilder::new()
-       .with_inner_size(size)
-       .build(&event_loop).unwrap(), size)
+    (
+        WindowBuilder::new()
+            .with_inner_size(size)
+            .build(&event_loop)
+            .unwrap(),
+        size,
+    )
 }
-#[cfg(target_arch="wasm32")]
+#[cfg(target_arch = "wasm32")]
 fn create_window(event_loop: &EventLoop<()>) -> (Window, PhysicalSize<u32>) {
     use winit::platform::web::WindowBuilderExtWebSys;
     web_sys::window()
@@ -34,20 +38,25 @@ fn create_window(event_loop: &EventLoop<()>) -> (Window, PhysicalSize<u32>) {
         .and_then(|doc| {
             let canvas_element = doc.get_element_by_id("gpuwu-canvas")?;
             let canvas = canvas_element
-                .dyn_into::<web_sys::HtmlCanvasElement>().ok()?;
+                .dyn_into::<web_sys::HtmlCanvasElement>()
+                .ok()?;
             //info!("Webpage canvas title (tooltip): {:?}", canvas.title());
             //info!("Webpage canvas width: {:?}, height: {:?}", canvas.width(), canvas.height());
             let size = PhysicalSize::new(canvas.width(), canvas.height());
-            Some((WindowBuilder::new()
-                .with_canvas(Some(canvas))
-                .with_inner_size(size)
-                .build(&event_loop).unwrap(), size))
+            Some((
+                WindowBuilder::new()
+                    .with_canvas(Some(canvas))
+                    .with_inner_size(size)
+                    .build(&event_loop)
+                    .unwrap(),
+                size,
+            ))
         })
         .expect("Could not connect canvas and winit window.")
 }
 
 // Main program loop
-#[cfg_attr(target_arch="wasm32", wasm_bindgen(start))]
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen(start))]
 pub async fn run() {
     // Initialize the right logging
     cfg_if::cfg_if! {
@@ -123,4 +132,3 @@ pub async fn run() {
         }
     });
 }
-

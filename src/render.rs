@@ -1,16 +1,13 @@
-use winit::{
-    window::Window,
-    event::*,
-};
-use wgpu::util::DeviceExt;
-use cgmath;
 use crate::camera::{Camera, CameraController, CameraUniform};
-use crate::texture::Texture;
-use crate::model::{ModelVertex, DrawModel, Model};
+use crate::model::{DrawModel, Model, ModelVertex};
 use crate::resources::load_model;
+use crate::texture::Texture;
+use cgmath;
 use cgmath::prelude::*;
 use log::info;
+use wgpu::util::DeviceExt;
 use winit::dpi::PhysicalSize;
+use winit::{event::*, window::Window};
 
 // Generic vertex
 pub trait Vertex {
@@ -24,7 +21,9 @@ struct Instance {
 impl Instance {
     fn to_raw(&self) -> InstanceRaw {
         InstanceRaw {
-            model: (cgmath::Matrix4::from_translation(self.position) * cgmath::Matrix4::from(self.rotation)).into(),
+            model: (cgmath::Matrix4::from_translation(self.position)
+                * cgmath::Matrix4::from(self.rotation))
+            .into(),
         }
     }
 }
@@ -109,20 +108,21 @@ impl RenderState {
             backends: wgpu::Backends::all(),
             dx12_shader_compiler: Default::default(),
         });
-        
+
         // # Safety
         //
         // The surface needs to live as long as the window that created it.
         // RenderState owns the window so this should be safe.
         let surface = unsafe { instance.create_surface(&window) }.unwrap();
 
-        let adapter = instance.request_adapter(
-            &wgpu::RequestAdapterOptions {
+        let adapter = instance
+            .request_adapter(&wgpu::RequestAdapterOptions {
                 power_preference: wgpu::PowerPreference::default(),
                 compatible_surface: Some(&surface),
                 force_fallback_adapter: false,
-            },
-        ).await.unwrap();
+            })
+            .await
+            .unwrap();
 
         info!("GPU info: {:?}", adapter.get_info());
 
@@ -142,26 +142,31 @@ impl RenderState {
         //    .unwrap();
 
         // Use adapter to create device and queue
-        let (device, queue) = adapter.request_device(
-        &wgpu::DeviceDescriptor {
-            features: wgpu::Features::empty(),
-            // WebGL doesn't support all of wgpu's features, so if
-            // we're building for the web we'll have to disable some.
-            limits: if cfg!(target_arch = "wasm32") {
-                wgpu::Limits::downlevel_webgl2_defaults()
-            } else {
-                wgpu::Limits::default()
-            },
-            label: None,
-        },
-        None, // Trace path
-        ).await.unwrap();
+        let (device, queue) = adapter
+            .request_device(
+                &wgpu::DeviceDescriptor {
+                    features: wgpu::Features::empty(),
+                    // WebGL doesn't support all of wgpu's features, so if
+                    // we're building for the web we'll have to disable some.
+                    limits: if cfg!(target_arch = "wasm32") {
+                        wgpu::Limits::downlevel_webgl2_defaults()
+                    } else {
+                        wgpu::Limits::default()
+                    },
+                    label: None,
+                },
+                None, // Trace path
+            )
+            .await
+            .unwrap();
 
         let surface_caps = surface.get_capabilities(&adapter);
         // Shader code in this tutorial assumes an sRGB surface texture. Using a different
         // one will result all the colors coming out darker. If you want to support non
         // sRGB surfaces, you'll need to account for that when drawing to the frame.
-        let surface_format = surface_caps.formats.iter()
+        let surface_format = surface_caps
+            .formats
+            .iter()
             .copied()
             .filter(|f| f.is_srgb())
             .next()
@@ -183,29 +188,29 @@ impl RenderState {
         surface.configure(&device, &config);
 
         let texture_bind_group_layout =
-                    device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
-                        entries: &[
-                            wgpu::BindGroupLayoutEntry {
-                                binding: 0,
-                                visibility: wgpu::ShaderStages::FRAGMENT,
-                                ty: wgpu::BindingType::Texture {
-                                    multisampled: false,
-                                    view_dimension: wgpu::TextureViewDimension::D2,
-                                    sample_type: wgpu::TextureSampleType::Float { filterable: true },
-                                },
-                                count: None,
-                            },
-                            wgpu::BindGroupLayoutEntry {
-                                binding: 1,
-                                visibility: wgpu::ShaderStages::FRAGMENT,
-                                // This should match the filterable field of the
-                                // corresponding Texture entry above.
-                                ty: wgpu::BindingType::Sampler(wgpu::SamplerBindingType::Filtering),
-                                count: None,
-                            },
-                        ],
-                        label: Some("texture_bind_group_layout"),
-                    });
+            device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+                entries: &[
+                    wgpu::BindGroupLayoutEntry {
+                        binding: 0,
+                        visibility: wgpu::ShaderStages::FRAGMENT,
+                        ty: wgpu::BindingType::Texture {
+                            multisampled: false,
+                            view_dimension: wgpu::TextureViewDimension::D2,
+                            sample_type: wgpu::TextureSampleType::Float { filterable: true },
+                        },
+                        count: None,
+                    },
+                    wgpu::BindGroupLayoutEntry {
+                        binding: 1,
+                        visibility: wgpu::ShaderStages::FRAGMENT,
+                        // This should match the filterable field of the
+                        // corresponding Texture entry above.
+                        ty: wgpu::BindingType::Sampler(wgpu::SamplerBindingType::Filtering),
+                        count: None,
+                    },
+                ],
+                label: Some("texture_bind_group_layout"),
+            });
         // Create camera
         let camera = Camera {
             // position the camera one unit up and 2 units back
@@ -222,18 +227,16 @@ impl RenderState {
         };
         let mut camera_uniform = CameraUniform::new();
         camera_uniform.update_view_proj(&camera);
-        
-        let camera_buffer = device.create_buffer_init(
-            &wgpu::util::BufferInitDescriptor {
-                label: Some("Camera Buffer"),
-                contents: bytemuck::cast_slice(&[camera_uniform]),
-                usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
-            }
-        );
+
+        let camera_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+            label: Some("Camera Buffer"),
+            contents: bytemuck::cast_slice(&[camera_uniform]),
+            usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
+        });
         // Create bind group (so that we can access the buffer in shaders)
-        let camera_bind_group_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
-            entries: &[
-                wgpu::BindGroupLayoutEntry {
+        let camera_bind_group_layout =
+            device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+                entries: &[wgpu::BindGroupLayoutEntry {
                     binding: 0,
                     visibility: wgpu::ShaderStages::VERTEX,
                     ty: wgpu::BindingType::Buffer {
@@ -242,22 +245,18 @@ impl RenderState {
                         min_binding_size: None,
                     },
                     count: None,
-                }
-            ],
-            label: Some("camera_bind_group_layout"),
-        });
+                }],
+                label: Some("camera_bind_group_layout"),
+            });
         let camera_bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
             layout: &camera_bind_group_layout,
-            entries: &[
-                wgpu::BindGroupEntry {
-                    binding: 0,
-                    resource: camera_buffer.as_entire_binding(),
-                }
-            ],
+            entries: &[wgpu::BindGroupEntry {
+                binding: 0,
+                resource: camera_buffer.as_entire_binding(),
+            }],
             label: Some("camera_bind_group"),
         });
 
-        
         // Create shaders
         let shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {
             label: Some("Shader"),
@@ -268,10 +267,7 @@ impl RenderState {
         let render_pipeline_layout =
             device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
                 label: Some("Render Pipeline Layout"),
-                bind_group_layouts: &[
-                    &texture_bind_group_layout,
-                    &camera_bind_group_layout,
-                ],
+                bind_group_layouts: &[&texture_bind_group_layout, &camera_bind_group_layout],
                 push_constant_ranges: &[],
             });
 
@@ -282,15 +278,14 @@ impl RenderState {
             vertex: wgpu::VertexState {
                 module: &shader,
                 entry_point: "vs_main",
-                buffers: &[
-                    ModelVertex::desc(),
-                    InstanceRaw::desc(),
-                ],
+                buffers: &[ModelVertex::desc(), InstanceRaw::desc()],
             },
-            fragment: Some(wgpu::FragmentState { // 3.
+            fragment: Some(wgpu::FragmentState {
+                // 3.
                 module: &shader,
                 entry_point: "fs_main",
-                targets: &[Some(wgpu::ColorTargetState { // 4.
+                targets: &[Some(wgpu::ColorTargetState {
+                    // 4.
                     format: config.format,
                     blend: Some(wgpu::BlendState::REPLACE),
                     write_mask: wgpu::ColorWrites::ALL,
@@ -313,12 +308,12 @@ impl RenderState {
                 format: Texture::DEPTH_FORMAT,
                 depth_write_enabled: true,
                 depth_compare: wgpu::CompareFunction::Less, // 1.
-                stencil: wgpu::StencilState::default(), // 2.
+                stencil: wgpu::StencilState::default(),     // 2.
                 bias: wgpu::DepthBiasState::default(),
             }),
             multisample: wgpu::MultisampleState {
-                count: 1, // 2.
-                mask: !0, // 3.
+                count: 1,                         // 2.
+                mask: !0,                         // 3.
                 alpha_to_coverage_enabled: false, // 4.
             },
             multiview: None, // 5.
@@ -331,53 +326,53 @@ impl RenderState {
         let depth_texture = Texture::create_depth_texture(&device, &config, "depth_texture");
 
         // Load Model
-        let obj_model =
-            load_model("cube.obj", &device, &queue, &texture_bind_group_layout)
+        let obj_model = load_model("cube.obj", &device, &queue, &texture_bind_group_layout)
             .await
             .unwrap();
 
         // The cube instances
         const SPACE_BETWEEN: f32 = 10.0;
-        let instances = (0..NUM_INSTANCES_PER_ROW).flat_map(|z| {
-            (0..NUM_INSTANCES_PER_ROW).map(move |x| {
-                let x = SPACE_BETWEEN * (x as f32 - NUM_INSTANCES_PER_ROW as f32 / 2.0);
-                let z = SPACE_BETWEEN * (z as f32 - NUM_INSTANCES_PER_ROW as f32 / 2.0);
-        
-                let position = cgmath::Vector3 { x, y: 0.0, z };
-        
-                let rotation = if position.is_zero() {
-                    cgmath::Quaternion::from_axis_angle(cgmath::Vector3::unit_z(), cgmath::Deg(0.0))
-                } else {
-                    cgmath::Quaternion::from_axis_angle(position.normalize(), cgmath::Deg(45.0))
-                };
-        
-                Instance {
-                    position, rotation,
-                }
+        let instances = (0..NUM_INSTANCES_PER_ROW)
+            .flat_map(|z| {
+                (0..NUM_INSTANCES_PER_ROW).map(move |x| {
+                    let x = SPACE_BETWEEN * (x as f32 - NUM_INSTANCES_PER_ROW as f32 / 2.0);
+                    let z = SPACE_BETWEEN * (z as f32 - NUM_INSTANCES_PER_ROW as f32 / 2.0);
+
+                    let position = cgmath::Vector3 { x, y: 0.0, z };
+
+                    let rotation = if position.is_zero() {
+                        cgmath::Quaternion::from_axis_angle(
+                            cgmath::Vector3::unit_z(),
+                            cgmath::Deg(0.0),
+                        )
+                    } else {
+                        cgmath::Quaternion::from_axis_angle(position.normalize(), cgmath::Deg(45.0))
+                    };
+
+                    Instance { position, rotation }
+                })
             })
-        }).collect::<Vec<_>>();
+            .collect::<Vec<_>>();
 
         // Instance buffer
         let instance_data = instances.iter().map(Instance::to_raw).collect::<Vec<_>>();
-        let instance_buffer = device.create_buffer_init(
-            &wgpu::util::BufferInitDescriptor {
-                label: Some("Instance Buffer"),
-                contents: bytemuck::cast_slice(&instance_data),
-                usage: wgpu::BufferUsages::VERTEX,
-            }
-        );
+        let instance_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+            label: Some("Instance Buffer"),
+            contents: bytemuck::cast_slice(&instance_data),
+            usage: wgpu::BufferUsages::VERTEX,
+        });
 
         // Font stuff
-        use cosmic_text::{Attrs, Color, FontSystem, SwashCache, Buffer, Metrics, Shaping};
-        
+        use cosmic_text::{Attrs, Buffer, Color, FontSystem, Metrics, Shaping, SwashCache};
+
         // A FontSystem provides access to detected system fonts, create one per application
         let mut font_system = FontSystem::new();
-        
+
         // A SwashCache stores rasterized glyphs, create one per application
         let mut swash_cache = SwashCache::new();
 
         let metrics = Metrics::new(14.0, 20.0);
-        let mut font_temp_buffer = Buffer::new(&mut font_system, metrics);       
+        let mut font_temp_buffer = Buffer::new(&mut font_system, metrics);
 
         // Done
         Self {
@@ -414,7 +409,8 @@ impl RenderState {
             self.config.height = new_size.height;
             self.surface.configure(&self.device, &self.config);
         }
-        self.depth_texture = Texture::create_depth_texture(&self.device, &self.config, "depth_texture");
+        self.depth_texture =
+            Texture::create_depth_texture(&self.device, &self.config, "depth_texture");
     }
 
     pub fn input(&mut self, event: &WindowEvent) -> bool {
@@ -456,15 +452,23 @@ impl RenderState {
     pub fn update(&mut self) {
         self.camera_controller.update_camera(&mut self.camera);
         self.camera_uniform.update_view_proj(&self.camera);
-        self.queue.write_buffer(&self.camera_buffer, 0, bytemuck::cast_slice(&[self.camera_uniform]));
+        self.queue.write_buffer(
+            &self.camera_buffer,
+            0,
+            bytemuck::cast_slice(&[self.camera_uniform]),
+        );
     }
 
     pub fn render(&mut self) -> Result<(), wgpu::SurfaceError> {
         let output = self.surface.get_current_texture()?;
-        let view = output.texture.create_view(&wgpu::TextureViewDescriptor::default());
-        let mut encoder = self.device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
-            label: Some("Render Encoder"),
-        });
+        let view = output
+            .texture
+            .create_view(&wgpu::TextureViewDescriptor::default());
+        let mut encoder = self
+            .device
+            .create_command_encoder(&wgpu::CommandEncoderDescriptor {
+                label: Some("Render Encoder"),
+            });
 
         // Big render!
         {
@@ -493,41 +497,44 @@ impl RenderState {
                 }),
             });
 
-        //// Text metrics indicate the font size and line height of a buffer
-        //let metrics = Metrics::new(14.0, 20.0);
-        //
-        //// A Buffer provides shaping and layout for a UTF-8 string, create one per text widget
-        //let mut buffer = Buffer::new(&mut font_system, metrics);
-        //
-        //// Borrow buffer together with the font system for more convenient method calls
-        //let mut font_temp_buffer = buffer.borrow_with(&mut font_system);
-        //
-        //// Set a size for the text buffer, in pixels
-        //font_temp_buffer.set_size(80.0, 25.0);
-        //
-        //// Attributes indicate what font to choose
-        //let attrs = Attrs::new();
-        //
-        //// Add some text!
-        //font_temp_buffer.set_text("Hello, Rust! 🦀\n", attrs, Shaping::Advanced);
-        //
-        //// Perform shaping as desired
-        //font_temp_buffer.shape_until_scroll();
-        //
-        //// Inspect the output runs
-        //for run in buffer.layout_runs() {
-        //    for glyph in run.glyphs.iter() {
-        //        println!("{:#?}", glyph);
-        //    }
-        //}
+            //// Text metrics indicate the font size and line height of a buffer
+            //let metrics = Metrics::new(14.0, 20.0);
+            //
+            //// A Buffer provides shaping and layout for a UTF-8 string, create one per text widget
+            //let mut buffer = Buffer::new(&mut font_system, metrics);
+            //
+            //// Borrow buffer together with the font system for more convenient method calls
+            //let mut font_temp_buffer = buffer.borrow_with(&mut font_system);
+            //
+            //// Set a size for the text buffer, in pixels
+            //font_temp_buffer.set_size(80.0, 25.0);
+            //
+            //// Attributes indicate what font to choose
+            //let attrs = Attrs::new();
+            //
+            //// Add some text!
+            //font_temp_buffer.set_text("Hello, Rust! 🦀\n", attrs, Shaping::Advanced);
+            //
+            //// Perform shaping as desired
+            //font_temp_buffer.shape_until_scroll();
+            //
+            //// Inspect the output runs
+            //for run in buffer.layout_runs() {
+            //    for glyph in run.glyphs.iter() {
+            //        println!("{:#?}", glyph);
+            //    }
+            //}
 
-        //// Create a default text color
-        //let text_color = Color::rgb(0xFF, 0xFF, 0xFF);
+            //// Create a default text color
+            //let text_color = Color::rgb(0xFF, 0xFF, 0xFF);
 
             render_pass.set_vertex_buffer(1, self.instance_buffer.slice(..));
             render_pass.set_pipeline(&self.render_pipeline);
-            render_pass.draw_model_instanced(&self.obj_model, 0..self.instances.len() as u32, &self.camera_bind_group);
-
+            render_pass.draw_model_instanced(
+                &self.obj_model,
+                0..self.instances.len() as u32,
+                &self.camera_bind_group,
+            );
         }
 
         // submit will accept anything that implements IntoIter
@@ -537,4 +544,3 @@ impl RenderState {
         Ok(())
     }
 }
-
