@@ -94,7 +94,6 @@ pub struct RenderState {
     // Font stuff
     font_system: cosmic_text::FontSystem,
     swash_cache: cosmic_text::SwashCache,
-    font_temp_buffer: cosmic_text::Buffer,
 }
 
 impl RenderState {
@@ -361,16 +360,13 @@ impl RenderState {
         });
 
         // Font stuff
-        use cosmic_text::{Attrs, Buffer, Color, FontSystem, Metrics, Shaping, SwashCache};
+        use cosmic_text::{FontSystem, SwashCache};
 
         // A FontSystem provides access to detected system fonts, create one per application
-        let mut font_system = FontSystem::new();
+        let font_system = FontSystem::new();
 
         // A SwashCache stores rasterized glyphs, create one per application
-        let mut swash_cache = SwashCache::new();
-
-        let metrics = Metrics::new(14.0, 20.0);
-        let mut font_temp_buffer = Buffer::new(&mut font_system, metrics);
+        let swash_cache = SwashCache::new();
 
         // Done
         Self {
@@ -392,7 +388,6 @@ impl RenderState {
             obj_model,
             font_system,
             swash_cache,
-            font_temp_buffer,
         }
     }
 

@@ -6,6 +6,10 @@ pub struct Text {
 }
 
 impl Text {
+    // TODO: use type system to make sure Text and this render pipeline are connected
+    //pub fn create_render_pipeline() -> wgpu::RenderPipeline {
+    //    
+    //}
     // Simple text from any string
     // If None is provided as width or height, that dimension is unbounded
     // Returns the resulted dimensions
