@@ -183,7 +183,8 @@ impl RenderState {
         };
         surface.configure(&device, &config);
 
-        // Texture
+        // Texture bind group layout
+        // This does not bind to any live state
         let texture_bind_group_layout =
             device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
                 entries: &[
@@ -208,6 +209,7 @@ impl RenderState {
                 ],
                 label: Some("texture_bind_group_layout"),
             });
+
         // Create camera
         let camera = Camera {
             // position the camera one unit up and 2 units back
@@ -230,7 +232,8 @@ impl RenderState {
             contents: bytemuck::cast_slice(&[camera_uniform]),
             usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
         });
-        // Create bind group (so that we can access the buffer in shaders)
+
+        // Create camera bind group (so that we can access the buffer in shaders)
         let camera_bind_group_layout =
             device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
                 entries: &[wgpu::BindGroupLayoutEntry {
