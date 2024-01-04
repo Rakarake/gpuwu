@@ -11,7 +11,7 @@ pub struct Text {
 #[repr(C)]
 #[derive(Copy, Clone, Debug, bytemuck::Pod, bytemuck::Zeroable)]
 pub struct TextVertex {
-    pub position: [f32; 2],
+    pub position: [u32; 2],
 }
 
 impl Vertex for TextVertex {
@@ -24,7 +24,7 @@ impl Vertex for TextVertex {
                 wgpu::VertexAttribute {
                     offset: 0,
                     shader_location: 0,
-                    format: wgpu::VertexFormat::Float32x2,
+                    format: wgpu::VertexFormat::Uint32x2,
                 },
             ],
         }
@@ -116,6 +116,7 @@ impl Text {
         device: &wgpu::Device,
         queue: &wgpu::Queue,
         label: Option<&str>,
+        position: (u32, u32),
     ) -> Result<(Self, (usize, usize))> {
         use cosmic_text::{Attrs, Buffer, Shaping};
 
@@ -184,9 +185,14 @@ impl Text {
             queue,
             &image::DynamicImage::ImageRgba8(imgbuf),
             label,
+
         )?;
-        let result = Text { text_buffer, texture };
+        let result = Text { text_buffer, texture, position: TextVertex { position: [position.0, position.1] } };
         Ok((result, (width as usize, height as usize)))
+
+    //text_buffer: cosmic_text::Buffer,
+    //texture: crate::texture::Texture,
+    //position: TextVertex,
     }
 }
 
