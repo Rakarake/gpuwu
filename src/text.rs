@@ -5,6 +5,7 @@ use crate::render::Vertex;
 pub struct Text {
     text_buffer: cosmic_text::Buffer,
     texture: crate::texture::Texture,
+    texture_bind_group: wgpu::BindGroup,
     position: TextVertex,
     size: (f32, f32),
 }
@@ -33,7 +34,7 @@ impl Vertex for TextVertex {
 }
 
 pub trait DrawText<'a> {
-    fn draw_mesh(
+    fn draw_text(
         &mut self,
         text_object: &'a Text,
     );
@@ -43,8 +44,9 @@ impl<'a, 'b> DrawText<'b> for wgpu::RenderPass<'a>
 where
     'b: 'a,
 {
-    fn draw_mesh(&mut self, text_object: &'b Text) {
-
+    fn draw_text(&mut self, text_object: &'b Text) {
+        self.set_bind_group(0, &text_object.texture_bind_group, &[]);
+        self.draw(0..3, 0..1);
     }
 }
 
@@ -52,8 +54,8 @@ impl Text {
     // TODO: use type system to make sure Text and this render pipeline are connected
     pub fn create_render_pipeline(
         device: &wgpu::Device,
-        config: wgpu::SurfaceConfiguration,
-        texture_bind_group_layout: wgpu::BindGroupLayout
+        config: &wgpu::SurfaceConfiguration,
+        texture_bind_group_layout: &wgpu::BindGroupLayout
     ) -> wgpu::RenderPipeline {
 
         // TODO: change shader to the right one
@@ -134,6 +136,7 @@ impl Text {
         queue: &wgpu::Queue,
         label: Option<&str>,
         position: (u32, u32),
+        texture_bind_group_layout: &wgpu::BindGroupLayout,
     ) -> Result<Self> {
         use cosmic_text::{Attrs, Buffer, Shaping};
 
@@ -204,7 +207,30 @@ impl Text {
             label,
 
         )?;
-        let result = Text { text_buffer, texture, position: TextVertex { position: [position.0, position.1] }, size: (width, height) };
+
+        // Create texture's bind group
+        let texture_bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
+            layout: texture_bind_group_layout,
+            entries: &[
+                wgpu::BindGroupEntry {
+                    binding: 0,
+                    resource: wgpu::BindingResource::TextureView(&texture.view),
+                },
+                wgpu::BindGroupEntry {
+                    binding: 1,
+                    resource: wgpu::BindingResource::Sampler(&texture.sampler),
+                },
+            ],
+            label: None,
+        });
+
+        let result = Text {
+            text_buffer,
+            texture,
+            position: TextVertex { position: [position.0, position.1] },
+            size: (width, height),
+            texture_bind_group,
+        };
         Ok(result)
 
     //text_buffer: cosmic_text::Buffer,

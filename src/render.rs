@@ -2,7 +2,7 @@ use crate::camera::{Camera, CameraController, CameraUniform};
 use crate::model::{DrawModel, Model, ModelVertex};
 use crate::resources::load_model;
 use crate::texture::Texture;
-use crate::text::Text;
+use crate::text::{DrawText, Text};
 use cgmath;
 use cgmath::prelude::*;
 use log::info;
@@ -376,7 +376,7 @@ impl RenderState {
 
         // Create the text render pipeline
         // TODO: check if parameters are correct
-        let text_render_pipeline = Text::create_render_pipeline(&device, config.clone(), texture_bind_group_layout);
+        let text_render_pipeline = Text::create_render_pipeline(&device, &config, &texture_bind_group_layout);
 
         // Create a test text object to render to screen! 🎆
         let text_color = cosmic_text::Color::rgb(0xFF, 0xFF, 0xFF);
@@ -386,7 +386,7 @@ impl RenderState {
         let text_metrics = cosmic_text::Metrics::new(FONT_SIZE, LINE_HEIGHT);
         let text_label = Some("Big text moment");
         let text_position = (10, 10);
-        let test_text = Text::new_from_str("big chungus", (None, None), text_color, &mut font_system, &mut swash_cache, text_metrics, &device, &queue, text_label, text_position).unwrap();
+        let test_text = Text::new_from_str("big chungus", (None, None), text_color, &mut font_system, &mut swash_cache, text_metrics, &device, &queue, text_label, text_position, &texture_bind_group_layout).unwrap();
 
         // Done
         Self {
@@ -523,7 +523,7 @@ impl RenderState {
 
             // Draw cool amazing text
             render_pass.set_pipeline(&self.text_render_pipeline);
-
+            render_pass.draw_text(&self.test_text);
         }
 
         // submit will accept anything that implements IntoIter
