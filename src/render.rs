@@ -2,6 +2,7 @@ use crate::camera::{Camera, CameraController, CameraUniform};
 use crate::model::{DrawModel, Model, ModelVertex};
 use crate::resources::load_model;
 use crate::texture::Texture;
+use crate::text::Text;
 use cgmath;
 use cgmath::prelude::*;
 use log::info;
@@ -94,6 +95,8 @@ pub struct RenderState {
     // Font stuff
     font_system: cosmic_text::FontSystem,
     swash_cache: cosmic_text::SwashCache,
+    text_render_pipeline: wgpu::RenderPipeline,
+    test_text: Text,
 }
 
 impl RenderState {
@@ -366,10 +369,24 @@ impl RenderState {
         use cosmic_text::{FontSystem, SwashCache};
 
         // A FontSystem provides access to detected system fonts, create one per application
-        let font_system = FontSystem::new();
+        let mut font_system = FontSystem::new();
 
         // A SwashCache stores rasterized glyphs, create one per application
-        let swash_cache = SwashCache::new();
+        let mut swash_cache = SwashCache::new();
+
+        // Create the text render pipeline
+        // TODO: check if parameters are correct
+        let text_render_pipeline = Text::create_render_pipeline(&device, config.clone(), texture_bind_group_layout);
+
+        // Create a test text object to render to screen! 🎆
+        let text_color = cosmic_text::Color::rgb(0xFF, 0xFF, 0xFF);
+        // Text metrics indicate the font size and line height of a buffer
+        const FONT_SIZE: f32 = 14.0;
+        const LINE_HEIGHT: f32 = FONT_SIZE * 1.2;
+        let text_metrics = cosmic_text::Metrics::new(FONT_SIZE, LINE_HEIGHT);
+        let text_label = Some("Big text moment");
+        let text_position = (10, 10);
+        let test_text = Text::new_from_str("big chungus", (None, None), text_color, &mut font_system, &mut swash_cache, text_metrics, &device, &queue, text_label, text_position).unwrap();
 
         // Done
         Self {
@@ -391,6 +408,8 @@ impl RenderState {
             obj_model,
             font_system,
             swash_cache,
+            text_render_pipeline,
+            test_text,
         }
     }
 
@@ -493,6 +512,7 @@ impl RenderState {
                 }),
             });
 
+            // Draw grid of stuff
             render_pass.set_vertex_buffer(1, self.instance_buffer.slice(..));
             render_pass.set_pipeline(&self.render_pipeline);
             render_pass.draw_model_instanced(
@@ -500,6 +520,10 @@ impl RenderState {
                 0..self.instances.len() as u32,
                 &self.camera_bind_group,
             );
+
+            // Draw cool amazing text
+            render_pass.set_pipeline(&self.text_render_pipeline);
+
         }
 
         // submit will accept anything that implements IntoIter

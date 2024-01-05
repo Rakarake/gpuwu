@@ -32,6 +32,22 @@ impl Vertex for TextVertex {
     }
 }
 
+pub trait DrawText<'a> {
+    fn draw_mesh(
+        &mut self,
+        text_object: &'a Text,
+    );
+}
+
+impl<'a, 'b> DrawText<'b> for wgpu::RenderPass<'a>
+where
+    'b: 'a,
+{
+    fn draw_mesh(&mut self, text_object: &'b Text) {
+
+    }
+}
+
 impl Text {
     // TODO: use type system to make sure Text and this render pipeline are connected
     pub fn create_render_pipeline(
@@ -43,7 +59,7 @@ impl Text {
         // TODO: change shader to the right one
         let shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {
             label: Some("Shader"),
-            source: wgpu::ShaderSource::Wgsl(include_str!("shader.wgsl").into()),
+            source: wgpu::ShaderSource::Wgsl(include_str!("text_shader.wgsl").into()),
         });
 
         let render_pipeline_layout =
@@ -107,7 +123,7 @@ impl Text {
     // If None is provided as width or height, that dimension is unbounded
     // Returns the resulted dimensions
     // TODO: make some sanity checks when converting between integer types
-    pub fn from_str(
+    pub fn new_from_str(
         text: &str,
         size: (Option<usize>, Option<usize>),
         color: cosmic_text::Color,
