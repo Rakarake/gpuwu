@@ -6,6 +6,7 @@ pub struct Text {
     text_buffer: cosmic_text::Buffer,
     texture: crate::texture::Texture,
     position: TextVertex,
+    size: (f32, f32),
 }
 
 #[repr(C)]
@@ -117,7 +118,7 @@ impl Text {
         queue: &wgpu::Queue,
         label: Option<&str>,
         position: (u32, u32),
-    ) -> Result<(Self, (usize, usize))> {
+    ) -> Result<Self> {
         use cosmic_text::{Attrs, Buffer, Shaping};
 
         let mut text_buffer = Buffer::new(font_system, metrics);
@@ -187,8 +188,8 @@ impl Text {
             label,
 
         )?;
-        let result = Text { text_buffer, texture, position: TextVertex { position: [position.0, position.1] } };
-        Ok((result, (width as usize, height as usize)))
+        let result = Text { text_buffer, texture, position: TextVertex { position: [position.0, position.1] }, size: (width, height) };
+        Ok(result)
 
     //text_buffer: cosmic_text::Buffer,
     //texture: crate::texture::Texture,
