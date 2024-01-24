@@ -6,7 +6,8 @@ pub struct Text {
     text_buffer: cosmic_text::Buffer,
     texture: crate::texture::Texture,
     texture_bind_group: wgpu::BindGroup,
-    position: TextVertex,
+    // Vertex buffer of one vertex 😏
+    vertex_buffer: wgpu::Buffer,
     size: (f32, f32),
 }
 
@@ -45,6 +46,7 @@ where
     'b: 'a,
 {
     fn draw_text(&mut self, text_object: &'b Text) {
+        self.set_vertex_buffer(0, text_object.vertex_buffer.slice(..));
         self.set_bind_group(0, &text_object.texture_bind_group, &[]);
         self.draw(0..3, 0..1);
     }
@@ -60,20 +62,20 @@ impl Text {
 
         // TODO: change shader to the right one
         let shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {
-            label: Some("Shader"),
+            label: Some("Text Shader"),
             source: wgpu::ShaderSource::Wgsl(include_str!("text_shader.wgsl").into()),
         });
 
         let render_pipeline_layout =
             device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
-                label: Some("Render Pipeline Layout"),
+                label: Some("Text Render Pipeline Layout"),
                 bind_group_layouts: &[&texture_bind_group_layout],
                 push_constant_ranges: &[],
             });
 
         // Create the render pipeline
         let render_pipeline = device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
-            label: Some("Render Pipeline"),
+            label: Some("Text Render Pipeline"),
             layout: Some(&render_pipeline_layout),
             vertex: wgpu::VertexState {
                 module: &shader,
@@ -134,8 +136,7 @@ impl Text {
         metrics: cosmic_text::Metrics,
         device: &wgpu::Device,
         queue: &wgpu::Queue,
-        label: Option<&str>,
-        position: (u32, u32),
+        vertex_buffer: &[TextVertex],
         texture_bind_group_layout: &wgpu::BindGroupLayout,
     ) -> Result<Self> {
         use cosmic_text::{Attrs, Buffer, Shaping};
@@ -204,8 +205,7 @@ impl Text {
             device,
             queue,
             &image::DynamicImage::ImageRgba8(imgbuf),
-            label,
-
+            Some("Text Texture"),
         )?;
 
         // Create texture's bind group
@@ -224,18 +224,30 @@ impl Text {
             label: None,
         });
 
+        // Create the vertex buffer
+        //positions
+        //let vertices = 
+        use wgpu::util::DeviceExt;
+        let vertex_buffer = device.create_buffer_init(
+            &wgpu::util::BufferInitDescriptor {
+                label: Some("Text Vertex Buffer"),
+                contents: bytemuck::cast_slice(vertex_buffer),
+                usage: wgpu::BufferUsages::VERTEX,
+            }
+        );
+
         let result = Text {
             text_buffer,
             texture,
-            position: TextVertex { position: [position.0, position.1] },
+            vertex_buffer,
             size: (width, height),
             texture_bind_group,
         };
         Ok(result)
 
-    //text_buffer: cosmic_text::Buffer,
-    //texture: crate::texture::Texture,
-    //position: TextVertex,
+        //text_buffer: cosmic_text::Buffer,
+        //texture: crate::texture::Texture,
+        //position: TextVertex,
     }
 }
 

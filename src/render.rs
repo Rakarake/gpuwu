@@ -262,7 +262,7 @@ impl RenderState {
 
         // Create shaders
         let shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {
-            label: Some("Shader"),
+            label: Some("Model Shader"),
             source: wgpu::ShaderSource::Wgsl(include_str!("shader.wgsl").into()),
         });
         // Alternatively: include_wgsl! for short syntax
@@ -384,9 +384,9 @@ impl RenderState {
         const FONT_SIZE: f32 = 14.0;
         const LINE_HEIGHT: f32 = FONT_SIZE * 1.2;
         let text_metrics = cosmic_text::Metrics::new(FONT_SIZE, LINE_HEIGHT);
-        let text_label = Some("Big text moment");
-        let text_position = (10, 10);
-        let test_text = Text::new_from_str("big chungus", (None, None), text_color, &mut font_system, &mut swash_cache, text_metrics, &device, &queue, text_label, text_position, &texture_bind_group_layout).unwrap();
+        //TODO: make text-postion-buffer
+        let text_vertex_buffer = [ crate::text::TextVertex { position: [10, 10] } ];
+        let test_text = Text::new_from_str("big chungus", (None, None), text_color, &mut font_system, &mut swash_cache, text_metrics, &device, &queue,&text_vertex_buffer, &texture_bind_group_layout).unwrap();
 
         // Done
         Self {
