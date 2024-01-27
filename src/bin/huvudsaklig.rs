@@ -49,7 +49,7 @@ fn main() {
 
     // Draw to the canvas
     buffer.draw(&mut swash_cache, TEXT_COLOR, |x, y, w, h, color| {
-        println!("x: {:?}, y: {:?}", x, y);
+        //println!("x: {:?}, y: {:?}", x, y);
         let a = color.a();
         if a == 0 || x < 0 || x >= width as i32 || y < 0 || y >= height as i32 || w != 1 || h != 1 {
             // Ignore alphas of 0, or invalid x, y coordinates, or unimplemented sizes

@@ -386,7 +386,7 @@ impl RenderState {
         let text_metrics = cosmic_text::Metrics::new(FONT_SIZE, LINE_HEIGHT);
         //TODO: make text-postion-buffer
         let text_vertex_buffer = [ crate::text::TextVertex { position: [10, 10] } ];
-        let test_text = Text::new_from_str("big chungus", (None, None), text_color, &mut font_system, &mut swash_cache, text_metrics, &device, &queue,&text_vertex_buffer, &texture_bind_group_layout).unwrap();
+        let test_text = Text::new_from_str("big chungus", (Some(80), Some(80)), text_color, &mut font_system, &mut swash_cache, text_metrics, &device, &queue,&text_vertex_buffer, &texture_bind_group_layout).unwrap();
 
         // Done
         Self {

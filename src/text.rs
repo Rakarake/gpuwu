@@ -171,7 +171,10 @@ impl Text {
         let height = metrics.line_height * buffer.layout_runs().count() as f32;
 
         // Create image to give to texture
-        let mut imgbuf = image::ImageBuffer::new(width as u32, height as u32);
+        // TODO: fix width/height size problem
+        println!("width: {:?}, height; {:?}", width, height);
+        println!("width: {:?}, height; {:?}", width.round() as u32, height.round() as u32);
+        let mut imgbuf = image::ImageBuffer::new(width.round() as u32, height.round() as u32);
 
         // Draw to the canvas
         buffer.draw(swash_cache, color, |x, y, w, h, color| {
