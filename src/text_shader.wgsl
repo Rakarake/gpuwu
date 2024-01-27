@@ -10,8 +10,9 @@ struct VertexOutput {
 @vertex
 fn vs_main(
     text_vertex: VertexInput,
+    //@builtin(vertex_index) in_vertex_index: u32,
 ) -> VertexOutput {
-    var in_vertex_index = 0.0;
+    var in_vertex_index: u32 = 0u;
     var out: VertexOutput;
     let x = f32(1 - i32(in_vertex_index)) * 0.5;
     let y = f32(i32(in_vertex_index & 1u) * 2 - 1) * 0.5;
