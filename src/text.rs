@@ -8,7 +8,6 @@ pub struct Text {
     texture_bind_group: wgpu::BindGroup,
     // Vertex buffer of one vertex 😏
     vertex_buffer: wgpu::Buffer,
-    size: (f32, f32),
 }
 
 #[repr(C)]
@@ -243,7 +242,6 @@ impl Text {
             text_buffer,
             texture,
             vertex_buffer,
-            size: (width, height),
             texture_bind_group,
         };
         Ok(result)
