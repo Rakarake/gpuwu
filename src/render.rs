@@ -385,7 +385,8 @@ impl RenderState {
         const LINE_HEIGHT: f32 = FONT_SIZE * 1.2;
         let text_metrics = cosmic_text::Metrics::new(FONT_SIZE, LINE_HEIGHT);
         //TODO: make text-postion-buffer
-        let text_vertex_buffer = [ crate::text::TextVertex { position: [10, 10] } ];
+        use crate::text::TextVertex;
+        let text_vertex_buffer = [ TextVertex { position: [10, 10] }, TextVertex { position: [15, 15] }, TextVertex { position: [20, 20] } ];
         let test_text = Text::new_from_str("big chungus", (Some(80), Some(80)), text_color, &mut font_system, &mut swash_cache, text_metrics, &device, &queue,&text_vertex_buffer, &texture_bind_group_layout).unwrap();
 
         // Done
@@ -513,13 +514,13 @@ impl RenderState {
             });
 
             // Draw grid of stuff
-            render_pass.set_vertex_buffer(1, self.instance_buffer.slice(..));
-            render_pass.set_pipeline(&self.render_pipeline);
-            render_pass.draw_model_instanced(
-                &self.obj_model,
-                0..self.instances.len() as u32,
-                &self.camera_bind_group,
-            );
+            //render_pass.set_vertex_buffer(1, self.instance_buffer.slice(..));
+            //render_pass.set_pipeline(&self.render_pipeline);
+            //render_pass.draw_model_instanced(
+            //    &self.obj_model,
+            //    0..self.instances.len() as u32,
+            //    &self.camera_bind_group,
+            //);
 
             // Draw cool amazing text
             render_pass.set_pipeline(&self.text_render_pipeline);
