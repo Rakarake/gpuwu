@@ -1,34 +1,41 @@
 use anyhow::*;
 use crate::texture::Texture;
-use crate::render::Vertex;
 
 pub struct Text {
     text_buffer: cosmic_text::Buffer,
     texture: crate::texture::Texture,
     texture_bind_group: wgpu::BindGroup,
-    // Vertex buffer of one vertex 😏
-    vertex_buffer: wgpu::Buffer,
+    instance_buffer: wgpu::Buffer,
+    instances: Vec<TextInstanceRaw>,
 }
 
+// Describes one instance of the text, that is the position, width and height
 #[repr(C)]
-#[derive(Copy, Clone, Debug, bytemuck::Pod, bytemuck::Zeroable)]
-pub struct TextVertex {
-    pub position: [u32; 2],
+#[derive(Copy, Clone, bytemuck::Pod, bytemuck::Zeroable)]
+pub struct TextInstanceRaw {
+    pub position: [f32; 2], // x, y
+    pub size: [f32; 2],     // width, height
 }
 
-impl Vertex for TextVertex {
+impl TextInstanceRaw {
     fn desc() -> wgpu::VertexBufferLayout<'static> {
         use std::mem;
         wgpu::VertexBufferLayout {
-            array_stride: mem::size_of::<TextVertex>() as wgpu::BufferAddress,
-            step_mode: wgpu::VertexStepMode::Vertex,
+            array_stride: mem::size_of::<TextInstanceRaw>() as wgpu::BufferAddress,
+            step_mode: wgpu::VertexStepMode::Instance,
             attributes: &[
                 wgpu::VertexAttribute {
                     offset: 0,
+                    // Arbitrary, shared with vertices
                     shader_location: 0,
-                    format: wgpu::VertexFormat::Uint32x2,
+                    format: wgpu::VertexFormat::Float32x2,
                 },
-            ],
+                wgpu::VertexAttribute {
+                    offset: mem::size_of::<[f32; 2]>() as wgpu::BufferAddress,
+                    shader_location: 1,
+                    format: wgpu::VertexFormat::Float32x2,
+                },
+            ]
         }
     }
 }
@@ -45,9 +52,9 @@ where
     'b: 'a,
 {
     fn draw_text(&mut self, text_object: &'b Text) {
-        self.set_vertex_buffer(0, text_object.vertex_buffer.slice(..));
         self.set_bind_group(0, &text_object.texture_bind_group, &[]);
-        self.draw(0..3, 0..1);
+        self.set_vertex_buffer(1, text_object.instance_buffer.slice(..));
+        self.draw_indexed(0..3, 0, 0..text_object.instances.len() as u32);
     }
 }
 
@@ -58,8 +65,6 @@ impl Text {
         config: &wgpu::SurfaceConfiguration,
         texture_bind_group_layout: &wgpu::BindGroupLayout
     ) -> wgpu::RenderPipeline {
-
-        // TODO: change shader to the right one
         let shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {
             label: Some("Text Shader"),
             source: wgpu::ShaderSource::Wgsl(include_str!("text_shader.wgsl").into()),
@@ -79,7 +84,7 @@ impl Text {
             vertex: wgpu::VertexState {
                 module: &shader,
                 entry_point: "vs_main",
-                buffers: &[TextVertex::desc()],
+                buffers: &[],
             },
             fragment: Some(wgpu::FragmentState {
                 // 3.
@@ -135,8 +140,8 @@ impl Text {
         metrics: cosmic_text::Metrics,
         device: &wgpu::Device,
         queue: &wgpu::Queue,
-        vertex_buffer: &[TextVertex],
         texture_bind_group_layout: &wgpu::BindGroupLayout,
+        instances: Vec<TextInstanceRaw>,
     ) -> Result<Self> {
         use cosmic_text::{Attrs, Buffer, Shaping};
 
@@ -226,23 +231,20 @@ impl Text {
             label: None,
         });
 
-        // Create the vertex buffer
-        //positions
-        //let vertices = 
+        // Instance buffer
         use wgpu::util::DeviceExt;
-        let vertex_buffer = device.create_buffer_init(
-            &wgpu::util::BufferInitDescriptor {
-                label: Some("Text Vertex Buffer"),
-                contents: bytemuck::cast_slice(vertex_buffer),
-                usage: wgpu::BufferUsages::VERTEX,
-            }
-        );
+        let instance_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+            label: Some("Instance Buffer"),
+            contents: bytemuck::cast_slice(&instances),
+            usage: wgpu::BufferUsages::VERTEX,
+        });
 
         let result = Text {
             text_buffer,
             texture,
-            vertex_buffer,
             texture_bind_group,
+            instance_buffer,
+            instances,
         };
         Ok(result)
 

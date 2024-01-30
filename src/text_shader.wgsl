@@ -1,6 +1,8 @@
-struct VertexInput {
-    @location(0) position: vec2<u32>
-}
+// Position
+struct InstanceInput {
+    @location(0) position: vec2<f32>,
+    @location(1) size: vec2<f32>,
+};
 
 struct VertexOutput {
     @builtin(position) clip_position: vec4<f32>,
@@ -10,7 +12,7 @@ struct VertexOutput {
 
 @vertex
 fn vs_main(
-    text_vertex: VertexInput,
+    instance: InstanceInput,
     @builtin(vertex_index) in_vertex_index: u32,
 ) -> VertexOutput {
     //var in_vertex_index: u32 = 0u;
