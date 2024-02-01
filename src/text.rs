@@ -53,8 +53,8 @@ where
 {
     fn draw_text(&mut self, text_object: &'b Text) {
         self.set_bind_group(0, &text_object.texture_bind_group, &[]);
-        self.set_vertex_buffer(1, text_object.instance_buffer.slice(..));
-        self.draw_indexed(0..3, 0, 0..text_object.instances.len() as u32);
+        self.set_vertex_buffer(0, text_object.instance_buffer.slice(..));
+        self.draw_indexed(0..6, 0, 0..text_object.instances.len() as u32);
     }
 }
 
@@ -84,7 +84,7 @@ impl Text {
             vertex: wgpu::VertexState {
                 module: &shader,
                 entry_point: "vs_main",
-                buffers: &[],
+                buffers: &[TextInstanceRaw::desc()],
             },
             fragment: Some(wgpu::FragmentState {
                 // 3.
