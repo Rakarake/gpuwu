@@ -386,7 +386,7 @@ impl RenderState {
         let text_metrics = cosmic_text::Metrics::new(FONT_SIZE, LINE_HEIGHT);
         //TODO: make text-postion-buffer
         let text_instances: Vec<crate::text::TextInstanceRaw> =
-            vec![crate::text::TextInstanceRaw { position: [1.0,1.0], size: [1.0,1.0] }];
+            vec![crate::text::TextInstanceRaw { position: [0.3, 0.3], size: [0.3, 0.3] }];
         let test_text = Text::new_from_str("big chungus", (Some(80), Some(80)), text_color, &mut font_system, &mut swash_cache, text_metrics, &device, &queue, &texture_bind_group_layout, text_instances).unwrap();
 
         // Done

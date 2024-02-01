@@ -19,8 +19,8 @@ fn vs_main(
     // Counter-clock-wise
     let u = f32((in_vertex_index >= 2u) && (in_vertex_index < 5u));
     let v = f32((in_vertex_index >= 1u) && (in_vertex_index < 4u));
-    let x = u * instance.size.x;
-    let y = v * instance.size.x;
+    let x = u * instance.size.x + instance.position.x;
+    let y = v * instance.size.y + instance.position.y;
     // TODO: figure this out
     out.clip_position = vec4<f32>(x, y, 0.0, 1.0);
     out.vert_pos = out.clip_position.xyz;

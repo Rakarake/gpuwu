@@ -54,7 +54,7 @@ where
     fn draw_text(&mut self, text_object: &'b Text) {
         self.set_bind_group(0, &text_object.texture_bind_group, &[]);
         self.set_vertex_buffer(0, text_object.instance_buffer.slice(..));
-        self.draw_indexed(0..6, 0, 0..text_object.instances.len() as u32);
+        self.draw(0..6, 0..1);
     }
 }
 
