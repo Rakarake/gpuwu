@@ -4,70 +4,70 @@ use cosmic_text::{Attrs, Buffer, Color, FontSystem, Metrics, Shaping, SwashCache
 use std::fmt::Write;
 
 fn main() {
-    // A FontSystem provides access to detected system fonts, create one per application
-    let mut font_system = FontSystem::new();
+    //// A FontSystem provides access to detected system fonts, create one per application
+    //let mut font_system = FontSystem::new();
 
-    // A SwashCache stores rasterized glyphs, create one per application
-    let mut swash_cache = SwashCache::new();
+    //// A SwashCache stores rasterized glyphs, create one per application
+    //let mut swash_cache = SwashCache::new();
 
-    // Text metrics indicate the font size and line height of a buffer
-    const FONT_SIZE: f32 = 14.0;
-    const LINE_HEIGHT: f32 = FONT_SIZE * 1.2;
-    let metrics = Metrics::new(FONT_SIZE, LINE_HEIGHT);
+    //// Text metrics indicate the font size and line height of a buffer
+    //const FONT_SIZE: f32 = 14.0;
+    //const LINE_HEIGHT: f32 = FONT_SIZE * 1.2;
+    //let metrics = Metrics::new(FONT_SIZE, LINE_HEIGHT);
 
-    // A Buffer provides shaping and layout for a UTF-8 string, create one per text widget
-    let mut buffer = Buffer::new(&mut font_system, metrics);
+    //// A Buffer provides shaping and layout for a UTF-8 string, create one per text widget
+    //let mut buffer = Buffer::new(&mut font_system, metrics);
 
-    let mut buffer = buffer.borrow_with(&mut font_system);
+    //let mut buffer = buffer.borrow_with(&mut font_system);
 
-    // Set a size for the text buffer, in pixels
-    let width = 80.0;
-    let height = f32::MAX; // The height is unbounded
-    buffer.set_size(width, height);
+    //// Set a size for the text buffer, in pixels
+    //let width = 80.0;
+    //let height = f32::MAX; // The height is unbounded
+    //buffer.set_size(width, height);
 
-    // Attributes indicate what font to choose
-    let attrs = Attrs::new();
+    //// Attributes indicate what font to choose
+    //let attrs = Attrs::new();
 
-    // Add some text!
-    let text = std::env::args()
-        .nth(1)
-        .unwrap_or(" Hi, Rust! 🦀 ".to_string());
-    buffer.set_text(&text, attrs, Shaping::Advanced);
+    //// Add some text!
+    //let text = std::env::args()
+    //    .nth(1)
+    //    .unwrap_or(" Hi, Rust! 🦀 ".to_string());
+    //buffer.set_text(&text, attrs, Shaping::Advanced);
 
-    // Perform shaping as desired
-    buffer.shape_until_scroll();
+    //// Perform shaping as desired
+    //buffer.shape_until_scroll();
 
-    // Default text color (0xFF, 0xFF, 0xFF is white)
-    const TEXT_COLOR: Color = Color::rgb(0xFF, 0xFF, 0xFF);
+    //// Default text color (0xFF, 0xFF, 0xFF is white)
+    //const TEXT_COLOR: Color = Color::rgb(0xFF, 0xFF, 0xFF);
 
-    // Set up the canvas
-    let width = buffer.size().0;
-    let height = LINE_HEIGHT * buffer.layout_runs().count() as f32;
-    let mut canvas = vec![vec![None; width as usize]; height as usize];
-    // Render the canvas to width x height
-    let mut imgbuf = image::ImageBuffer::new(width as u32, height as u32);
+    //// Set up the canvas
+    //let width = buffer.size().0;
+    //let height = LINE_HEIGHT * buffer.layout_runs().count() as f32;
+    //let mut canvas = vec![vec![None; width as usize]; height as usize];
+    //// Render the canvas to width x height
+    //let mut imgbuf = image::ImageBuffer::new(width as u32, height as u32);
 
-    // Draw to the canvas
-    buffer.draw(&mut swash_cache, TEXT_COLOR, |x, y, w, h, color| {
-        //println!("x: {:?}, y: {:?}", x, y);
-        let a = color.a();
-        if a == 0 || x < 0 || x >= width as i32 || y < 0 || y >= height as i32 || w != 1 || h != 1 {
-            // Ignore alphas of 0, or invalid x, y coordinates, or unimplemented sizes
-            return;
-        }
+    //// Draw to the canvas
+    //buffer.draw(&mut swash_cache, TEXT_COLOR, |x, y, w, h, color| {
+    //    //println!("x: {:?}, y: {:?}", x, y);
+    //    let a = color.a();
+    //    if a == 0 || x < 0 || x >= width as i32 || y < 0 || y >= height as i32 || w != 1 || h != 1 {
+    //        // Ignore alphas of 0, or invalid x, y coordinates, or unimplemented sizes
+    //        return;
+    //    }
 
-        // Scale by alpha (mimics blending with black)
-        let scale = |c: u8| (c as i32 * a as i32 / 255).clamp(0, 255) as u8;
+    //    // Scale by alpha (mimics blending with black)
+    //    let scale = |c: u8| (c as i32 * a as i32 / 255).clamp(0, 255) as u8;
 
-        let r = scale(color.r());
-        let g = scale(color.g());
-        let b = scale(color.b());
-        canvas[y as usize][x as usize] = Some((r, g, b));
+    //    let r = scale(color.r());
+    //    let g = scale(color.g());
+    //    let b = scale(color.b());
+    //    canvas[y as usize][x as usize] = Some((r, g, b));
 
-        let pixel = imgbuf.get_pixel_mut(x as u32, y as u32);
-        *pixel = image::Rgb([r, g, b]);
-    });
-    imgbuf.save("fractal.png").unwrap();
+    //    let pixel = imgbuf.get_pixel_mut(x as u32, y as u32);
+    //    *pixel = image::Rgb([r, g, b]);
+    //});
+    //imgbuf.save("fractal.png").unwrap();
 
     //// Cool fractal
     //let imgx = 800;

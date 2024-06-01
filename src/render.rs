@@ -384,10 +384,9 @@ impl RenderState {
         const FONT_SIZE: f32 = 14.0;
         const LINE_HEIGHT: f32 = FONT_SIZE * 1.2;
         let text_metrics = cosmic_text::Metrics::new(FONT_SIZE, LINE_HEIGHT);
-        //TODO: make text-postion-buffer
         let text_instances: Vec<crate::text::TextInstanceRaw> =
-            vec![crate::text::TextInstanceRaw { position: [0.3, 0.3], size: [0.3, 0.3] }];
-        let test_text = Text::new_from_str("big chungus", (Some(80), Some(80)), text_color, &mut font_system, &mut swash_cache, text_metrics, &device, &queue, &texture_bind_group_layout, text_instances).unwrap();
+            vec![crate::text::TextInstanceRaw { position: [0.1, 0.1], size: [0.6, 0.6] }];
+        let test_text = Text::new_from_str("big chungus 🐇", (Some(80), Some(80)), text_color, &mut font_system, &mut swash_cache, text_metrics, &device, &queue, &texture_bind_group_layout, text_instances).unwrap();
 
         // Done
         Self {
