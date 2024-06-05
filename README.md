@@ -31,12 +31,12 @@ let mut state: i32 = 0;
 // Can choose different callbacks
 uwu.gogogo(&mut state)
     .on_update(| state: &mut i32, renderer: &mut gpuwu::Renderer | {
-    if state % 2 == 0 {
-        renderer.render([
-            background,
-            text,
-        ]);
-    }
+        if state % 2 == 0 {
+            renderer.render([
+                background,
+                text,
+            ]);
+        }
     })
     .on_event(| state: &mut i32, event: gpuwu::Event | {
         match event {
