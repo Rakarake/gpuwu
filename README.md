@@ -1,5 +1,7 @@
 # GPUwU
 
+NOTE: this is just a simple API draft.
+
 Abstracts rendering of simple 2D objects, window creation,
 the event loop and window related action such as copy-pasting.
 
