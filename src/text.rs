@@ -159,19 +159,19 @@ impl Text {
         } else {
             f32::MAX
         };
-        buffer.set_size(width, height);
+        buffer.set_size(Some(width), Some(height));
 
         // Attributes indicate what font to choose
         let attrs = Attrs::new();
 
         // Finally, set the text!
-        buffer.set_text(&text, attrs, Shaping::Advanced);
+        buffer.set_text(&text, &attrs, Shaping::Advanced);
 
         // Perform shaping as desired
-        buffer.shape_until_scroll();
+        buffer.shape_until_scroll(false);
 
         // Set up the canvas
-        let width = buffer.size().0;
+        let width = buffer.size().0.unwrap();
         let height = metrics.line_height * buffer.layout_runs().count() as f32;
 
         // Create image to give to texture
